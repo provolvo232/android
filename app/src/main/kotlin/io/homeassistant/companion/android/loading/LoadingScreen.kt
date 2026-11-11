@@ -1,6 +1,10 @@
 package io.homeassistant.companion.android.loading
 
 import android.annotation.SuppressLint
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import android.os.Build
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
@@ -117,71 +121,17 @@ private val BRAND_HORIZONTAL_PADDING = HADimens.SPACE4
 private val BRAND_TEXT_SPACING = HADimens.SPACE1
 
 @Composable
-fun LoadingScreen(modifier: Modifier = Modifier, showBrand: Boolean = false) {
-    // Skip the fade-in in previews and screenshot tests, which capture the first frame
-    val initialAlpha = if (LocalInspectionMode.current) 1f else 0f
-    val brandAlpha = remember { Animatable(initialAlpha) }
-    LaunchedEffect(Unit) {
-        brandAlpha.animateTo(1f, tween(durationMillis = CONTENT_FADE_IN_MILLIS))
-    }
-    BoxWithConstraints(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .fillMaxSize()
-            .splashScreenArea(),
-    ) {
-        val navigationBarsPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        val brandBottomPadding = max(navigationBarsPadding, HADimens.SPACE12)
-        val brandText = stringResource(commonR.string.loading_screen_project_from).uppercase()
-        val brandTextStyle = HATextStyle.BodyMedium.copy(
-            color = LocalHAColorScheme.current.colorTextDisabled,
-        )
-        val ohfLogo = ImageVector.vectorResource(commonR.drawable.ohf_lockup_inline_monochrome)
-        val ohfLogoRatio = ohfLogo.defaultWidth.value / ohfLogo.defaultHeight.value
-        // Shrink the logo below its nominal height when the screen is too narrow for it at
-        // full size, so it fits without losing its aspect ratio.
-        val ohfLogoHeight = ((maxWidth - BRAND_HORIZONTAL_PADDING * 2) / ohfLogoRatio)
-            .coerceIn(0.dp, OHF_LOGO_HEIGHT)
-        val brandHeight = brandHeight(
-            text = brandText,
-            style = brandTextStyle,
-            containerWidthPx = constraints.maxWidth,
-            logoHeight = ohfLogoHeight,
-            bottomPadding = brandBottomPadding,
-        )
-
-        LoadingIcon(offset = if (showBrand) iconOffset(maxHeight, brandHeight) else 0.dp)
-        if (showBrand) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = BRAND_HORIZONTAL_PADDING),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = brandText,
-                    style = brandTextStyle,
-                    modifier = Modifier.padding(bottom = BRAND_TEXT_SPACING),
-                )
-                Image(
-                    imageVector = ohfLogo,
-                    contentDescription = "Open Home Foundation",
-                    modifier = Modifier
-                        .padding(bottom = brandBottomPadding)
-                        .height(ohfLogoHeight)
-                        // Size by height: the intrinsic size is kept small for the vector lint
-                        // rule, so laying out at intrinsic width would shrink the logo.
-                        .aspectRatio(
-                            ratio = ohfLogoRatio,
-                            matchHeightConstraintsFirst = true,
-                        )
-                        .graphicsLayer { alpha = brandAlpha.value },
-                )
-            }
-        }
-    }
+fun LoadingScreen(
+    modifier: Modifier = Modifier,
+    showBrand: Boolean = false,
+) {
+    Image(
+        painter = painterResource(id = R.drawable.oxygen_splash),
+        contentDescription = null,
+        modifier = modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop,
+    )
 }
-
 /**
  * Constrains content to the area the launch screen draws in, so this screen's centered icon lines
  * up with it.

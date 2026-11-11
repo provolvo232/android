@@ -105,6 +105,14 @@ import io.homeassistant.companion.android.util.sensitive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import timber.log.Timber
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 /** Minimum swipe velocity (pixels/second) to trigger a gesture action. */
 private const val MINIMUM_GESTURE_VELOCITY = 75f
@@ -497,8 +505,15 @@ private fun StateOverlay(
 
     // The loading overlay is rendered on top of the `when` so that on leaving the loading states it
     // fades out over.
+    var minimumSplashFinished by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(1500)
+        minimumSplashFinished = true
+    }
     AnimatedVisibility(
-        visible = viewState is FrontendViewState.LoadServer || viewState is FrontendViewState.Loading,
+        visible = !minimumSplashFinished ||
+            viewState is FrontendViewState.LoadServer ||
+            viewState is FrontendViewState.Loading,
         enter = EnterTransition.None,
         exit = fadeOut(animationSpec = tween(durationMillis = LOADING_OVERLAY_FADE_OUT_MILLIS)),
     ) {
